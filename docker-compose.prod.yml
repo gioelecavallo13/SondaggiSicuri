@@ -1,0 +1,61 @@
+# Overlay produzione (solo VPS / CI prod-like con Traefik).
+# In locale si usa `docker-compose.dev.yml` + base, non questo file.
+#
+# Prerequisiti VPS:
+#   • Rete Docker esterna `rete_per_instradamento` (stesso stack Traefik in /opt/traefik).
+#   • Nel `.env`: `SONDAGGI_TRAEFIK_HOST` = FQDN senza schema (es. app.esempio.it), allineato a APP_URL.
+#   • `sudo mkdir -p /data/sondaggi/media /data/sondaggi/logs` + chown www-data (vedi sotto).
+#
+# Avvio:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#
+# Verifica merge (nessun publish 3306 / 8000 su 0.0.0.0):
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml config
+#
+# Opzionale debug sulla VPS: sostituire sotto `web` con
+#   ports: !override
+#     - "127.0.0.1:8000:10000"
+
+networks:
+  rete_per_instradamento:
+    external: true
+
+services:
+  web:
+    networks:
+      - default
+      - rete_per_instradamento
+    ports: !reset []
+    volumes:
+      - ${SONDAGGI_MEDIA_PATH:-/data/sondaggi/media}:/var/www/html/storage/app/public
+      - ${SONDAGGI_LOGS_PATH:-/data/sondaggi/logs}:/var/www/html/storage/logs
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=rete_per_instradamento
+      # HTTPS (porta container artisan serve)
+      - traefik.http.routers.sondaggi-secure.rule=Host(`${SONDAGGI_TRAEFIK_HOST?Imposta SONDAGGI_TRAEFIK_HOST nel .env (FQDN pubblico)}`)
+      - traefik.http.routers.sondaggi-secure.entrypoints=websecure
+      - traefik.http.routers.sondaggi-secure.tls=true
+      - traefik.http.routers.sondaggi-secure.tls.certresolver=letsencrypt
+      - traefik.http.routers.sondaggi-secure.middlewares=default-ratelimit@file,default-secure-headers@file
+      - traefik.http.routers.sondaggi-secure.service=sondaggi-svc
+      - traefik.http.services.sondaggi-svc.loadbalancer.server.port=10000
+      # HTTP → HTTPS, escluso ACME HTTP-01
+      - traefik.http.routers.sondaggi-http.rule=Host(`${SONDAGGI_TRAEFIK_HOST?Imposta SONDAGGI_TRAEFIK_HOST nel .env (FQDN pubblico)}`) && !PathPrefix(`/.well-known/acme-challenge/`)
+      - traefik.http.routers.sondaggi-http.entrypoints=web
+      - traefik.http.routers.sondaggi-http.middlewares=sondaggi-https-redirect
+      - traefik.http.routers.sondaggi-http.service=noop@internal
+      - traefik.http.middlewares.sondaggi-https-redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.sondaggi-https-redirect.redirectscheme.permanent=true
+
+  worker:
+    volumes:
+      - ${SONDAGGI_MEDIA_PATH:-/data/sondaggi/media}:/var/www/html/storage/app/public
+      - ${SONDAGGI_LOGS_PATH:-/data/sondaggi/logs}:/var/www/html/storage/logs
+
+  db:
+    ports: !reset []
+
+  phpmyadmin:
+    ports:
+      - "127.0.0.1:8084:80"

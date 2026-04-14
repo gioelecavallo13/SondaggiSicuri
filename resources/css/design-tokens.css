@@ -1,0 +1,249 @@
+/**
+ * Token e tema (DESIGN.md + mockup Stitch code.html, blocco tailwind.config).
+ *
+ * Convenzione `site-`: tutta l’UI custom del progetto usa il prefisso `site-`
+ * (classi e variabili --site-*), allineato a `.site-navbar` esistente.
+ * Eccezioni legacy (.hero, .sm-*, .step-card, …) vanno migrate nelle fasi successive.
+ */
+
+:root {
+  /* Palette — Stitch / DESIGN.md */
+  --site-color-primary: #0058be;
+  --site-color-primary-container: #2170e4;
+  --site-primary-container-rgb: 33, 112, 228;
+  --site-color-surface: #f9f9ff;
+  --site-color-on-surface: #191b23;
+  --site-color-on-surface-variant: #424754;
+  --site-color-surface-container-lowest: #ffffff;
+  --site-color-surface-container-low: #f2f3fd;
+  --site-color-surface-container: #ecedf7;
+  --site-color-surface-container-high: #e6e7f2;
+  --site-color-surface-container-highest: #e1e2ec;
+  --site-color-outline: #727785;
+  --site-color-outline-variant: #c2c6d6;
+  --site-color-error: #ba1a1a;
+  --site-color-on-error: #ffffff;
+  --site-color-error-container: #ffdad6;
+  --site-color-on-error-container: #93000a;
+  --site-color-secondary: #495e8a;
+  --site-color-secondary-container: #b6ccff;
+  --site-color-on-secondary-container: #405682;
+  --site-color-primary-fixed: #d8e2ff;
+  --site-color-on-primary-fixed: #001a42;
+  --site-color-secondary-fixed: #d8e2ff;
+
+  /* Alias legacy — compat con app.css / components-ui (migrazione graduale) */
+  --color-primary: var(--site-color-primary);
+  --color-primary-dark: #004395;
+  --color-accent: var(--site-color-primary-container);
+  --color-surface: var(--site-color-surface);
+  --color-elevated: var(--site-color-surface-container-lowest);
+  --color-border-subtle: color-mix(in srgb, var(--site-color-outline-variant) 22%, transparent);
+  --color-text: var(--site-color-on-surface);
+  --color-text-muted: var(--site-color-on-surface-variant);
+  --color-surface-muted: var(--site-color-surface-container-low);
+
+  --radius-site-xl: 1rem;
+  --radius-site-lg: 0.75rem;
+  --radius-card: var(--radius-site-xl);
+  --radius-hero: var(--radius-site-xl);
+
+  --shadow-card: 0 1px 3px color-mix(in srgb, var(--site-color-on-surface) 6%, transparent);
+  --shadow-card-hover: 0 12px 28px color-mix(in srgb, var(--site-color-primary) 14%, transparent);
+
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-headline: "Manrope", var(--font-sans);
+
+  --transition-fast: 150ms ease;
+  --transition-reveal: 280ms ease;
+
+  /* Bootstrap 5.3 — allineamento Stitch */
+  --bs-primary: var(--site-color-primary);
+  --bs-primary-rgb: 0, 88, 190;
+  --bs-link-color: var(--site-color-primary);
+  --bs-link-hover-color: #004395;
+  --bs-body-bg: var(--site-color-surface);
+  --bs-body-color: var(--site-color-on-surface);
+  --bs-secondary: var(--site-color-secondary);
+  --bs-secondary-rgb: 73, 94, 138;
+  --bs-border-color: var(--color-border-subtle);
+  --bs-emphasis-color: var(--site-color-on-surface);
+  --bs-danger: var(--site-color-error);
+  --bs-danger-rgb: 186, 26, 26;
+}
+
+/* ——— Tipografia (DESIGN.md: display-lg, headline-md, body/label) ——— */
+
+.site-font-headline {
+  font-family: var(--font-headline);
+}
+
+.site-font-body {
+  font-family: var(--font-sans);
+}
+
+.site-display-lg {
+  font-family: var(--font-headline);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  color: inherit;
+}
+
+.site-headline-md {
+  font-family: var(--font-headline);
+  font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.site-body-lg {
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.site-body-md {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.site-label-md {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.site-icon-muted {
+  opacity: 0.72;
+}
+
+/* ——— Primitivi UI centralizzati ——— */
+
+.site-glass-navbar {
+  background: color-mix(in srgb, var(--site-color-surface) 78%, transparent) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid color-mix(in srgb, var(--site-color-outline-variant) 18%, transparent) !important;
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--site-color-on-surface) 4%, transparent);
+}
+
+.site-glass-navbar.scrolled {
+  box-shadow: 0 4px 24px color-mix(in srgb, var(--site-color-on-surface) 8%, transparent);
+}
+
+/* .hero: alias legacy — nelle nuove viste usare .site-hero-gradient */
+.site-hero-gradient,
+.hero {
+  background: linear-gradient(135deg, var(--site-color-primary), var(--site-color-primary-container));
+  color: #fff;
+  border-radius: var(--radius-hero);
+  padding: clamp(1.75rem, 4vw, 2.5rem);
+  margin-bottom: 0;
+  box-shadow: 0 10px 40px color-mix(in srgb, var(--site-color-primary) 22%, transparent);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.site-card {
+  background: var(--site-color-surface-container-lowest);
+  border: none;
+  border-radius: var(--radius-site-xl);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow var(--transition-fast);
+}
+
+.site-card:hover {
+  box-shadow: var(--shadow-card-hover);
+}
+
+.site-input,
+.site-input.form-control,
+.site-input.form-select {
+  background: var(--site-color-surface-container-highest);
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: var(--radius-site-lg);
+  color: var(--site-color-on-surface);
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.site-input::placeholder {
+  color: color-mix(in srgb, var(--site-color-on-surface-variant) 75%, transparent);
+}
+
+.site-input:hover,
+.site-input.form-control:hover,
+.site-input.form-select:hover {
+  background: var(--site-color-surface-container-high);
+}
+
+.site-input:focus,
+.site-input.form-control:focus,
+.site-input.form-select:focus {
+  background: var(--site-color-surface-container-low);
+  border-bottom-color: var(--site-color-primary);
+  box-shadow: none;
+  outline: none;
+}
+
+.site-input:focus-visible,
+.site-input.form-control:focus-visible,
+.site-input.form-select:focus-visible {
+  outline: 2px solid var(--site-color-primary);
+  outline-offset: 2px;
+}
+
+.site-btn-pill-primary {
+  --site-btn-shadow: 0 4px 20px color-mix(in srgb, var(--site-color-primary) 35%, transparent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.55rem 1.35rem;
+  font-weight: 600;
+  color: #fff !important;
+  text-decoration: none;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--site-color-primary), var(--site-color-primary-container));
+  box-shadow: var(--site-btn-shadow);
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    filter var(--transition-fast);
+}
+
+.site-btn-pill-primary:hover {
+  filter: brightness(1.03);
+  box-shadow: 0 6px 28px color-mix(in srgb, var(--site-color-primary) 40%, transparent);
+  color: #fff !important;
+}
+
+.site-btn-pill-primary:focus-visible {
+  outline: 2px solid var(--site-color-primary);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .site-btn-pill-primary:hover {
+    transform: translateY(-1px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-hero-gradient,
+  .hero,
+  .site-card,
+  .site-btn-pill-primary {
+    transition: none !important;
+  }
+
+  .site-btn-pill-primary:hover {
+    transform: none;
+  }
+}

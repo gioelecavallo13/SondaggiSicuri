@@ -1,0 +1,61 @@
+# Override sviluppo: immagine costruita dal Dockerfile + codice montato da `./` (bind mount).
+#
+# Build immagine e avvio stack (db, migrate, web, worker se COMPOSE_PROFILES=queue, phpMyAdmin):
+#   docker compose -f docker-compose.dev.yml -f docker-compose.yml up -d --build
+#
+# Solo rebuild immagine app (contesto = directory progetto, come in produzione):
+#   docker compose -f docker-compose.dev.yml -f docker-compose.yml build web
+#
+# Rigenerare asset Vite sul tree montato (profilo `assets`):
+#   docker compose -f docker-compose.dev.yml -f docker-compose.yml --profile assets run --rm assets
+#
+# Composer nel mount + volume `vendor` nominato (profilo `tools`, dopo `up` almeno una volta):
+#   docker compose -f docker-compose.dev.yml -f docker-compose.yml --profile tools run --rm composer
+#
+# Ordine file: prima questo file, poi `docker-compose.yml` (merge come FitLifeMilano).
+#
+# Colima (macOS/Linux, al posto di Docker Desktop): `colima start`, poi stesso `docker compose …`.
+# Il bind `./` è condiviso dalla VM se il repo è sotto la home montata (default Colima).
+# In Cursor/VS Code: Run Task → «Sondaggi: Colima + dev stack (build + mount)».
+
+services:
+  phpmyadmin:
+    ports:
+      - "127.0.0.1:8080:80"
+
+  assets:
+    image: node:22-alpine
+    profiles: ["assets"]
+    working_dir: /app
+    volumes:
+      - ./:/app
+    command: sh -c "npm ci && npm run build"
+
+  composer:
+    image: composer:2
+    profiles: ["tools"]
+    working_dir: /var/www/html
+    env_file:
+      - .env
+    volumes:
+      - ./:/var/www/html
+      - sondaggi_vendor:/var/www/html/vendor
+    command: ["composer", "install", "--no-interaction"]
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sondaggi-app
+    ports:
+      - "18080:10000"
+    volumes:
+      - ./:/var/www/html
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sondaggi-app
+    volumes:
+      - ./:/var/www/html
