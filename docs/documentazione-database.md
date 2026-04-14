@@ -35,6 +35,7 @@ erDiagram
 | `email` | VARCHAR(190), UNIQUE | |
 | `password_hash` | VARCHAR(255) | Laravel `User` usa `getAuthPassword()` |
 | `remember_token` | | |
+| `foto_profilo` | VARCHAR(255), nullable | Path su disco `public` (es. `profile-photos/{id}/…`); URL via `/storage/…` con symlink |
 | `data_creazione` | TIMESTAMP | `CREATED_AT` del model |
 
 ### 3.2 `sondaggi`
@@ -141,6 +142,7 @@ Messaggi dal form contatti: `nome`, `email`, `messaggio`, `data_invio`.
 ## 7. Seed e dati iniziali
 
 - Migrazione **seed tag** predefiniti (`2026_04_11_000000_seed_default_survey_tags.php`): categorie iniziali per i filtri pubblici.
+- Migrazione **`foto_profilo` su `utenti`** (`2026_04_14_120000_add_foto_profilo_to_utenti_table.php`): colonna opzionale per la foto profilo.
 
 ## 8. Manutenzione schema
 

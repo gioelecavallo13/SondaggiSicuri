@@ -46,7 +46,7 @@ Modifica **`.env`** almeno così (valori coerenti tra loro; puoi adattare nomi e
 Genera la chiave applicativa **prima** del primo avvio completo (così il servizio `migrate` non fallisce):
 
 ```bash
-docker compose -f docker-compose.dev.yml -f docker-compose.yml run --rm --no-deps --entrypoint php web artisan key:generate --force
+docker compose -f docker-compose.yml -f docker-compose.dev.yml run --rm --no-deps --entrypoint php web artisan key:generate --force
 ```
 
 Il comando usa l’immagine `web` (eventualmente la costruisce), monta la cartella del progetto e aggiorna `APP_KEY` nel tuo `.env`.
@@ -62,7 +62,7 @@ Assicurati che Docker sia avviato (Docker Desktop aperto, oppure ad esempio `col
 Dalla root del progetto:
 
 ```bash
-docker compose -f docker-compose.dev.yml -f docker-compose.yml up -d --build
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
 ```
 
 Cosa succede in sintesi:
@@ -83,10 +83,10 @@ Apri nel browser: **http://127.0.0.1:18080**
 - **Frontend (Vite)**: dopo modifiche a `resources/js` o `resources/css`, rigenera gli asset con:
 
 ```bash
-docker compose -f docker-compose.dev.yml -f docker-compose.yml --profile assets run --rm assets
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile assets run --rm assets
 ```
 
-(Profilo **`assets`**: container Node che esegue `npm ci && npm run build` sul codice montato.)
+(Profilo **`assets`**: container Node che esegue `npm ci && npm run build` sul codice montato; `public/build/` viene aggiornato sul tuo disco. Un volume anonimo su `/app/node_modules` nel servizio `assets` evita errori se sul Mac hai già installato dipendenze diverse da quelle Linux.)
 
 Opzionale: profilo **`tools`** con servizio `composer` per un `composer install` manuale sul mount, se ti serve.
 
@@ -96,9 +96,9 @@ Opzionale: profilo **`tools`** con servizio `composer` per un `composer install`
 
 | Azione | Comando |
 |--------|---------|
-| Log del container app | `docker compose -f docker-compose.dev.yml -f docker-compose.yml logs -f web` |
-| Fermare tutto | `docker compose -f docker-compose.dev.yml -f docker-compose.yml down` |
-| Artisan nel container | `docker compose -f docker-compose.dev.yml -f docker-compose.yml exec web php artisan …` |
+| Log del container app | `docker compose -f docker-compose.yml -f docker-compose.dev.yml logs -f web` |
+| Fermare tutto | `docker compose -f docker-compose.yml -f docker-compose.dev.yml down` |
+| Artisan nel container | `docker compose -f docker-compose.yml -f docker-compose.dev.yml exec web php artisan …` |
 
 ---
 

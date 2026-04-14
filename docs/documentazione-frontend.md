@@ -20,8 +20,16 @@ Non è presente un framework UI reattivo globale (niente Vue/React): lo stato di
 
 Comandi tipici:
 
-- `npm run dev` — server Vite con hot reload.
+- `npm run dev` — server Vite con hot reload (sviluppo locale con Node installato).
 - `npm run build` — asset di produzione in `public/build/` (anche eseguito nella fase Docker dell’immagine app).
+
+**Docker (override dev):** dopo modifiche a CSS/JS va rigenerato il bundle sul mount, altrimenti il browser continua a usare i file già presenti in `public/build/`:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile assets run --rm assets
+```
+
+Il servizio `assets` esegue `npm ci && npm run build` in un container Node; il volume anonimo su `/app/node_modules` evita conflitti tra dipendenze installate sull’host (es. macOS) e `npm ci` su Linux (vedi `docker-compose.dev.yml`).
 
 ## 3. Struttura CSS
 
@@ -63,6 +71,7 @@ Il file è organizzato in **IIFE** e blocchi per contesto (non moduli ES separat
 | **Sondaggi pubblici** | `#sm-public-surveys-root`: `fetch` verso `surveys.public.search`, debounce su ricerca, chip tag, paginazione HTML sostituita, stato errore. |
 | **QR condivisione** | `data-sm-qr-share`: generazione canvas con libreria `qrcode`. |
 | **Count-up** | Animazione numeri su `[data-count-up]`. |
+| **Profilo / foto** | `#profile-avatar-root`: upload foto via `fetch` (POST `multipart` con CSRF) verso `profile.photo.upload`; aggiornamento DOM dell’avatar e messaggi in `#profile-photo-alert`. |
 
 ### 4.1 Stato lato client
 
@@ -110,6 +119,12 @@ Le pagine impostano `@section('title', …)` per il titolo finestra.
 
 - Intestazione survey, grafici Chart.js, tabelle partecipanti (colonne dipendenti dalla privacy), link export PDF.
 
+### 6.7 Profilo utente (`/profilo`)
+
+- Hero con avatar circolare (iniziali o foto), upload immagine con overlay e icona fotocamera (stili `.site-profile-avatar*` in `app.css`).
+- Pannelli “Dati personali” e “Sicurezza e accesso” (logout, link dashboard).
+- Le foto servite da `/storage/...` richiedono `php artisan storage:link` se il symlink non è presente.
+
 ## 7. Dipendenze npm (runtime)
 
 | Pacchetto | Uso |
@@ -122,3 +137,4 @@ Le pagine impostano `@section('title', …)` per il titolo finestra.
 
 - Flussi server che alimentano le viste → [documentazione-backend.md](documentazione-backend.md).
 - Dati mostrati nelle card e nei report → [documentazione-database.md](documentazione-database.md).
+- Percorso utente end-to-end (accesso, creazione sondaggio, condivisione, report) → [caso-duso-progetto.md](caso-duso-progetto.md).

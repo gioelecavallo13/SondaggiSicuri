@@ -48,7 +48,7 @@ flowchart LR
 
 ## 4. Funzionalità principali
 
-1. **Account**: registrazione, login, logout; password su tabella `utenti` (`password_hash`).
+1. **Account**: registrazione, login, logout; password su tabella `utenti` (`password_hash`); profilo con foto opzionale.
 2. **Dashboard autore**: elenco sondaggi propri, link a modifica, statistiche, eliminazione; ordinamento con scaduti in fondo.
 3. **Creazione / modifica sondaggio**: titolo, descrizione, pubblico/privato, scadenza, tag, privacy, domande (testo, tipo singola/multipla, opzioni). Vincoli su modifica se esistono già risposte.
 4. **Condivisione**: ogni sondaggio ha `access_token` (48 caratteri alfanumerici); route `surveys.show` e `surveys.submit` lo usano al posto dell’ID numerico.
@@ -56,7 +56,8 @@ flowchart LR
 6. **Sondaggi pubblici**: `/sondaggi` con ricerca, filtri tag, paginazione; ricerca live via JSON; sondaggi già compilati dall’utente ordinati in coda e card visivamente “disattivate”.
 7. **Statistiche**: pagina autore con aggregati, partecipanti (secondo privacy), export **PDF** (DomPDF).
 8. **Contatti**: modulo messaggi persistito in `contatti`.
-9. **Sicurezza operativa**: rate limit tentativi di submit per IP (hash), cookie UUID per anti-duplicato su sondaggi anonimi, redirect sicuri post-login.
+9. **Profilo**: pagina `/profilo` con dati account, logout; caricamento foto profilo (file su disco pubblico, colonna `utenti.foto_profilo`).
+10. **Sicurezza operativa**: rate limit tentativi di submit per IP (hash), cookie UUID per anti-duplicato su sondaggi anonimi, redirect sicuri post-login.
 
 ## 5. Flussi end-to-end
 
@@ -88,6 +89,7 @@ flowchart LR
 - **Frontend**: struttura asset, Blade, componenti visivi → [documentazione-frontend.md](documentazione-frontend.md).
 - **Backend**: controller, servizi, auth, endpoint JSON → [documentazione-backend.md](documentazione-backend.md).
 - **Database**: tabelle e relazioni → [documentazione-database.md](documentazione-database.md).
+- **Caso d’uso** (flusso utente: accesso, sondaggi, condivisione, report) → [caso-duso-progetto.md](caso-duso-progetto.md).
 
 ## 8. Convenzioni e naming
 

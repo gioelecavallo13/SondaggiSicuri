@@ -26,6 +26,8 @@
 | Metodo | Path | Nome route | Note |
 |--------|------|------------|------|
 | POST | `/logout` | `logout` | |
+| GET | `/profilo` | `profile.show` | Profilo utente (dati account, foto) |
+| POST | `/profilo/foto` | `profile.photo.upload` | Upload foto profilo → **JSON** (`url`, errori validazione) |
 | GET | `/dashboard` | `dashboard` | Elenco sondaggi autore |
 | GET/POST | `/dashboard/sondaggi/nuovo` | `surveys.create`, `surveys.store` | Creazione |
 | GET/POST | `/dashboard/sondaggi/{id}/modifica` | `surveys.edit`, `surveys.update` | `whereNumber` |
@@ -55,20 +57,25 @@
 
 - Validazione e persistenza messaggi in `contatti`.
 
-### 3.4 `PublicSurveyController`
+### 3.4 `ProfileController`
+
+- `show`: vista Blade `profile.show` con dati utente corrente.
+- `uploadPhoto`: validazione file immagine (JPEG/PNG/WebP/GIF, max 2 MB), delega a `ProfilePhotoService::storeReplacingPrevious`, salva path in `utenti.foto_profilo`, risposta JSON con URL pubblico (`/storage/...`). Richiede symlink storage per servire i file.
+
+### 3.5 `PublicSurveyController`
 
 - Dipende da `ResponseSubmissionService`.
 - Elenco filtrato: pubblici, non scaduti, ricerca testuale, filtro tag; ordinamento con **partecipazione** (già risposti in coda) via SQL; paginazione.
 - Annotazione attributo `viewer_has_responded` su ogni modello della pagina corrente.
 - `search`: validazione input; JSON con frammenti HTML (card + paginazione) per aggiornamento client.
 
-### 3.5 `SurveyController`
+### 3.6 `SurveyController`
 
 - Dashboard, CRUD sondaggio (validazione payload in controller), show take, statistiche, export PDF.
 - Autorizzazione `authorize` su update/destroy/stats dove applicabile.
 - Binding implicito `Sondaggio` per route numeriche dashboard; binding per **token** su `show`/`submit`.
 
-### 3.6 `ResponseController`
+### 3.7 `ResponseController`
 
 - Submit: carica sondaggio, gestisce scaduto (vista chiusa + errori), validazione risposte, richiede utente autenticato, delega a `ResponseSubmissionService::submitAuthenticated`.
 - Cookie opzionale per client UUID su sondaggi **anonimi** (config `sondaggi.anonymous_vote_cookie`).
@@ -102,8 +109,9 @@ L’applicazione non espone un’API REST versionata separata; gli endpoint JSON
 
 1. **`GET /sondaggi/ricerca`** — parametri `q`, `tags[]`, `page`; risposta `{ cards_html, pagination_html, empty }`.
 2. **`GET .../statistiche/dati`** — payload per grafici (autore solo); struttura definita in `SurveyController::statsData` / servizio.
+3. **`POST /profilo/foto`** — upload foto profilo; risposta JSON con `url` o struttura errori Laravel.
 
-Entrambi pensati per consumo interno dal frontend della stessa origine (cookie di sessione).
+Tutti pensati per consumo interno dal frontend della stessa origine (cookie di sessione e header `X-CSRF-TOKEN` dove applicabile).
 
 ## 7. Config rilevante (`config/sondaggi.php`)
 
@@ -129,4 +137,5 @@ Entrambi pensati per consumo interno dal frontend della stessa origine (cookie d
 - Feature test su flussi sondaggio, pubblico, auth, PDF, partecipazione elenco pubblico.
 - Unit test su servizi di supporto (privacy notice, redirect sicuri, statistiche partecipanti).
 
-Per il modello dati sottostante → [documentazione-database.md](documentazione-database.md).
+Per il modello dati sottostante → [documentazione-database.md](documentazione-database.md).  
+Scenario d’uso dal punto di vista utente → [caso-duso-progetto.md](caso-duso-progetto.md).

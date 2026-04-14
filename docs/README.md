@@ -5,6 +5,7 @@ Indice della documentazione tecnica del progetto. Ogni file è autonomo e pensat
 | Documento | Contenuto |
 |-----------|------------|
 | [Documentazione generale](documentazione-generale.md) | Panoramica, architettura, funzionalità, flussi end-to-end |
+| [Caso d’uso del progetto](caso-duso-progetto.md) | Flusso utente: accesso, creazione sondaggio, opzioni, condivisione, statistiche e PDF |
 | [Documentazione frontend](documentazione-frontend.md) | Vite, Blade, CSS, JavaScript, UI/UX, interazioni |
 | [Documentazione backend](documentazione-backend.md) | Laravel, routing, servizi, autenticazione, API JSON |
 | [Documentazione database](documentazione-database.md) | Schema, tabelle, relazioni, modelli Eloquent |
