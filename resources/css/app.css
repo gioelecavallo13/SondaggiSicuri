@@ -1769,18 +1769,18 @@ html.motion-reveal-enabled [data-reveal][data-reveal-stagger] {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--site-color-on-surface) 45%, transparent);
+  background: color-mix(in srgb, var(--site-color-on-surface) 34%, transparent);
   color: #fff;
   font-size: 1.35rem;
   line-height: 1;
-  opacity: 0;
+  opacity: 1;
   pointer-events: none;
-  transition: opacity var(--transition-fast);
+  transition: background var(--transition-fast);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .site-profile-avatar--interactive:hover:not(.is-busy) .site-profile-avatar__hover {
-    opacity: 1;
+    background: color-mix(in srgb, var(--site-color-on-surface) 52%, transparent);
   }
 }
 
@@ -1869,7 +1869,7 @@ html.motion-reveal-enabled [data-reveal][data-reveal-stagger] {
 }
 
 .site-profile-field:first-of-type {
-  padding-top: 0;
+  padding-top: 1.25rem;
 }
 
 .site-profile-field:last-child {

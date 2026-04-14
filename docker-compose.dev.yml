@@ -37,6 +37,8 @@ services:
     working_dir: /app
     volumes:
       - ./:/app
+      # Evita conflitti tra node_modules dell’host (es. macOS) e npm ci in Linux (ENOTEMPTY).
+      - /app/node_modules
     command: sh -c "npm ci && npm run build"
 
   composer:
