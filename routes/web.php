@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicSurveyController;
 use App\Http\Controllers\ResponseController;
 use App\Http\Controllers\SurveyController;
@@ -27,6 +28,8 @@ Route::get('/sondaggi', [PublicSurveyController::class, 'index'])->name('surveys
 Route::get('/sondaggi/ricerca', [PublicSurveyController::class, 'search'])->name('surveys.public.search');
 
 Route::middleware('auth')->group(function (): void {
+    Route::get('/profilo', [ProfileController::class, 'show'])->name('profile.show');
+    Route::post('/profilo/foto', [ProfileController::class, 'uploadPhoto'])->name('profile.photo.upload');
     Route::get('/dashboard', [SurveyController::class, 'dashboard'])->name('dashboard');
     Route::get('/dashboard/sondaggi/nuovo', [SurveyController::class, 'createForm'])->name('surveys.create');
     Route::post('/dashboard/sondaggi/nuovo', [SurveyController::class, 'store'])->name('surveys.store');

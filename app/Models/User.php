@@ -26,6 +26,7 @@ class User extends Authenticatable
         'nome',
         'email',
         'password_hash',
+        'foto_profilo',
     ];
 
     protected $hidden = [
@@ -43,6 +44,18 @@ class User extends Authenticatable
     public function getAuthPassword(): string
     {
         return $this->password_hash;
+    }
+
+    /** Path assoluto sul sito (es. /storage/profile-photos/…); richiede symlink `public/storage`. */
+    public function profilePhotoUrl(): ?string
+    {
+        if (blank($this->foto_profilo)) {
+            return null;
+        }
+
+        $normalized = str_replace('\\', '/', $this->foto_profilo);
+
+        return '/storage/'.ltrim($normalized, '/');
     }
 
     public function sondaggi(): HasMany

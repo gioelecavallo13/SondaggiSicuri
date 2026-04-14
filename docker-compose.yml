@@ -4,12 +4,12 @@
 # Schema DB: solo `php artisan migrate` (servizio one-shot `migrate`). La cartella
 # `docker/mysql/init` è lasciata vuota (nessun DDL duplicato rispetto alle migrations).
 #
-# Sviluppo locale con codice montato dall’host:
-#   docker compose -f docker-compose.dev.yml -f docker-compose.yml up -d --build
-# (prima `docker-compose.dev.yml`, poi `docker-compose.yml`, come FitLifeMilano.)
+# Sviluppo locale (override dev dopo la base — l’ultimo file `-f` vince sui campi in conflitto):
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
 #
-# Produzione VPS (Traefik, media/log su host, phpMyAdmin loopback 8084; sviluppo locale: docker-compose.dev.yml):
+# Produzione VPS — solo base + prod (NON usare docker-compose.dev.yml sulla VPS):
 #   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# Le uniche modifiche “strutturali” qui sono commenti sul servizio migrate; web/worker/db restano come prima.
 #
 # Solo questo file (senza dev/prod): phpMyAdmin non espone porte sull’host; usare overlay dev o rete Docker.
 #
@@ -43,6 +43,9 @@ x-app-volumes: &app-volumes
   - sondaggi_bootstrap_cache:/var/www/html/bootstrap/cache
 
 services:
+  # Schema: migration nell’immagine al build. Dopo `git pull` con nuove migration (VPS o base senza dev):
+  #   docker compose build migrate && docker compose run --rm migrate
+  # In locale con codice montato: `docker compose -f docker-compose.yml -f docker-compose.dev.yml run --rm migrate`
   migrate:
     build: *app-build
     image: *app-image

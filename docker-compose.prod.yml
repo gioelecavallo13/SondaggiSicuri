@@ -1,5 +1,6 @@
 # Overlay produzione (solo VPS / CI prod-like con Traefik).
-# In locale si usa `docker-compose.dev.yml` + base, non questo file.
+# In locale si usa la base + `docker-compose.dev.yml`, non questo file.
+# Eventuali commenti aggiunti in `docker-compose.yml` (servizio migrate) non alterano il merge con questo file.
 #
 # Prerequisiti VPS:
 #   • Rete Docker esterna `rete_per_instradamento` (stesso stack Traefik in /opt/traefik).

@@ -1,24 +1,32 @@
 # Override sviluppo: immagine costruita dal Dockerfile + codice montato da `./` (bind mount).
 #
 # Build immagine e avvio stack (db, migrate, web, worker se COMPOSE_PROFILES=queue, phpMyAdmin):
-#   docker compose -f docker-compose.dev.yml -f docker-compose.yml up -d --build
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
 #
-# Solo rebuild immagine app (contesto = directory progetto, come in produzione):
-#   docker compose -f docker-compose.dev.yml -f docker-compose.yml build web
+# Solo rebuild immagine app:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml build web
 #
 # Rigenerare asset Vite sul tree montato (profilo `assets`):
-#   docker compose -f docker-compose.dev.yml -f docker-compose.yml --profile assets run --rm assets
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile assets run --rm assets
 #
 # Composer nel mount + volume `vendor` nominato (profilo `tools`, dopo `up` almeno una volta):
-#   docker compose -f docker-compose.dev.yml -f docker-compose.yml --profile tools run --rm composer
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile tools run --rm composer
 #
-# Ordine file: prima questo file, poi `docker-compose.yml` (merge come FitLifeMilano).
+# Ordine `-f`: prima `docker-compose.yml` (base), poi questo file — l’override dev (porte 18080, mount `./`, migrate)
+# si applica correttamente. Non usare questo file in produzione sulla VPS.
+# In `.env` imposta APP_URL allo stesso schema/host/porta con cui apri il sito (es. http://127.0.0.1:18080)
+# per email e URL assoluti; le foto profilo usano path `/storage/...` relativi all’origine della pagina.
 #
 # Colima (macOS/Linux, al posto di Docker Desktop): `colima start`, poi stesso `docker compose …`.
 # Il bind `./` è condiviso dalla VM se il repo è sotto la home montata (default Colima).
 # In Cursor/VS Code: Run Task → «Sondaggi: Colima + dev stack (build + mount)».
 
 services:
+  # Stesso mount del codice di `web`: altrimenti `migrate` usa solo l’immagine e non vede le migration aggiunte in locale.
+  migrate:
+    volumes:
+      - ./:/var/www/html
+
   phpmyadmin:
     ports:
       - "127.0.0.1:8080:80"

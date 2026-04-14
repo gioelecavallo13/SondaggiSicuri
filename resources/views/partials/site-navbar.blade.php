@@ -1,5 +1,6 @@
 @php
     $isDashboard = str_starts_with(request()->path(), 'dashboard');
+    $isProfile = request()->routeIs('profile.show');
 @endphp
 <nav class="navbar navbar-expand-lg navbar-light site-navbar site-glass-navbar sticky-top py-0" id="site-navbar" aria-label="Navigazione principale">
     <div class="container site-shell">
@@ -25,6 +26,9 @@
                 @auth
                     <li class="nav-item">
                         <a class="nav-link px-lg-2{{ $isDashboard ? ' active' : '' }}" href="{{ route('dashboard') }}"@if($isDashboard) aria-current="page"@endif>Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-lg-2{{ $isProfile ? ' active' : '' }}" href="{{ route('profile.show') }}"@if($isProfile) aria-current="page"@endif>Profilo</a>
                     </li>
                 @endauth
             </ul>

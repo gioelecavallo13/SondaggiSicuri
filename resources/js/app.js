@@ -889,6 +889,131 @@ window.Chart = Chart;
     }
   }
 
+  const avatarRoot = document.getElementById("profile-avatar-root");
+  const profilePhotoInput = document.getElementById("profile-photo-input");
+  if (avatarRoot && profilePhotoInput) {
+    const circle = document.getElementById("profile-avatar-circle");
+    const alertEl = document.getElementById("profile-photo-alert");
+    const uploadUrl = avatarRoot.getAttribute("data-upload-url");
+    const maxBytes = parseInt(avatarRoot.getAttribute("data-max-bytes") || "2097152", 10);
+    const allowedMime = new Set(["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"]);
+
+    const setPhotoAlert = (msg) => {
+      if (!alertEl) return;
+      if (!msg) {
+        alertEl.classList.add("d-none");
+        alertEl.textContent = "";
+        return;
+      }
+      alertEl.textContent = msg;
+      alertEl.classList.remove("d-none");
+    };
+
+    const setAvatarBusy = (busy) => {
+      if (circle) {
+        circle.classList.toggle("is-busy", busy);
+        circle.setAttribute("aria-busy", busy ? "true" : "false");
+      }
+      profilePhotoInput.disabled = busy;
+    };
+
+    const applyPhotoFromServer = (url) => {
+      if (!circle || !url) return;
+      const sep = url.includes("?") ? "&" : "?";
+      const busted = `${url}${sep}t=${Date.now()}`;
+      circle.classList.add("site-profile-avatar--has-photo");
+      const hoverEl = circle.querySelector(".site-profile-avatar__hover");
+      let img = circle.querySelector(".site-profile-avatar__img");
+      if (!img) {
+        img = document.createElement("img");
+        img.className = "site-profile-avatar__img";
+        img.alt = "";
+        img.width = 72;
+        img.height = 72;
+        img.decoding = "async";
+        if (hoverEl) {
+          circle.insertBefore(img, hoverEl);
+        } else {
+          circle.appendChild(img);
+        }
+      }
+      img.removeAttribute("hidden");
+      img.classList.remove("d-none");
+      img.src = busted;
+      const initials = circle.querySelector(".site-profile-avatar__initials");
+      if (initials) initials.classList.add("visually-hidden");
+    };
+
+    const parseUploadError = async (res) => {
+      try {
+        const data = await res.json();
+        const photoErr = data?.errors?.photo;
+        if (Array.isArray(photoErr) && photoErr[0]) return String(photoErr[0]);
+        if (data?.message) return String(data.message);
+      } catch {
+        /* risposta non JSON: messaggio generico per l’utente */
+      }
+      return "Non è stato possibile aggiornare la foto. Verifica il file e riprova.";
+    };
+
+    profilePhotoInput.addEventListener("change", async () => {
+      setPhotoAlert("");
+      const file = profilePhotoInput.files?.[0];
+      if (!file || !uploadUrl) {
+        profilePhotoInput.value = "";
+        return;
+      }
+
+      const extOk = /\.(jpe?g|png|gif|webp)$/i.test(file.name);
+      const mimeOk =
+        allowedMime.has(file.type) ||
+        (extOk && (!file.type || file.type === "application/octet-stream"));
+      if (!mimeOk) {
+        setPhotoAlert("Formato non valido. Sono accettati JPEG (JPG), PNG, WebP o GIF.");
+        profilePhotoInput.value = "";
+        return;
+      }
+      if (file.size > maxBytes) {
+        setPhotoAlert("Il file supera la dimensione massima consentita (2 MB).");
+        profilePhotoInput.value = "";
+        return;
+      }
+
+      const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") ?? "";
+      const formData = new FormData();
+      formData.append("photo", file);
+
+      setAvatarBusy(true);
+      try {
+        const res = await fetch(uploadUrl, {
+          method: "POST",
+          body: formData,
+          credentials: "same-origin",
+          headers: {
+            Accept: "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+            ...(token ? { "X-CSRF-TOKEN": token } : {})
+          }
+        });
+
+        if (!res.ok) {
+          setPhotoAlert(await parseUploadError(res));
+          return;
+        }
+
+        const data = await res.json();
+        if (data?.url) {
+          applyPhotoFromServer(String(data.url));
+        }
+      } catch {
+        setPhotoAlert("Connessione non riuscita. Riprova tra poco.");
+      } finally {
+        setAvatarBusy(false);
+        profilePhotoInput.value = "";
+      }
+    });
+  }
+
   const countUpEls = document.querySelectorAll("[data-count-up][data-count-target]");
   if (countUpEls.length > 0) {
     const durationMs = 800;
