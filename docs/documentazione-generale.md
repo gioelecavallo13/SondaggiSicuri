@@ -90,6 +90,7 @@ flowchart LR
 - **Backend**: controller, servizi, auth, endpoint JSON → [documentazione-backend.md](documentazione-backend.md).
 - **Database**: tabelle e relazioni → [documentazione-database.md](documentazione-database.md).
 - **Caso d’uso** (flusso utente: accesso, sondaggi, condivisione, report) → [caso-duso-progetto.md](caso-duso-progetto.md).
+- **Roadmap evolutiva** (linee guida per nuove feature) → [future-implementazioni.md](future-implementazioni.md).
 
 ## 8. Convenzioni e naming
 
