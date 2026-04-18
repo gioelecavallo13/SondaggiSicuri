@@ -66,6 +66,8 @@ window.Chart = Chart;
     });
   });
 
+  // reCAPTCHA sulla registrazione: vedi partial Blade `register-recaptcha-inline` (non dipende da Vite).
+
   const contactForm = document.getElementById("contact-form");
   if (contactForm) {
     contactForm.addEventListener("submit", (event) => {

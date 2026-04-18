@@ -20,11 +20,31 @@
             </div>
         @endif
 
-        <form method="post" action="{{ route('register') }}" id="register-form" data-sm-form-loading @if($errors->any()) aria-describedby="register-summary-errors" @endif>
+        <div class="alert alert-warning py-2 px-3 mb-4 d-none" role="alert" aria-live="polite" id="register-client-error"></div>
+
+        <form
+            method="post"
+            action="{{ route('register') }}"
+            id="register-form"
+            data-recaptcha-site-key="{{ e($recaptcha_site_key) }}"
+            @if($errors->any()) aria-describedby="register-summary-errors" @endif
+        >
             @csrf
             @if($redirect !== '')
                 <input type="hidden" name="redirect" value="{{ $redirect }}">
             @endif
+
+            {{-- Anti-bot: honeypot (lasciare vuoto); compilazione = sospetto lato server --}}
+            <div class="position-absolute" style="left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden;" aria-hidden="true">
+                <label for="reg-website">Sito web</label>
+                <input type="text" name="website" id="reg-website" tabindex="-1" autocomplete="off" value="">
+            </div>
+
+            <input type="hidden" name="form_rendered_at" value="{{ (string) now()->getTimestamp() }}">
+            <input type="hidden" name="recaptcha_token" value="">
+            <input type="hidden" name="client_accept_language" value="">
+            <input type="hidden" name="client_timezone" value="">
+            <input type="hidden" name="client_screen" value="">
 
             <div class="mb-4">
                 <label class="site-auth-label" for="reg-nome">Nome</label>
@@ -90,4 +110,9 @@
         </p>
     </div>
 </div>
+@if(trim((string) ($recaptcha_site_key ?? '')) !== '')
+    @push('scripts')
+        @include('partials.register-recaptcha-inline')
+    @endpush
+@endif
 @endsection
