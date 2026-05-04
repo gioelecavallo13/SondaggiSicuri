@@ -1,28 +1,21 @@
-# Override sviluppo: immagine costruita dal Dockerfile + codice montato da `./` (bind mount).
+# Override sviluppo: bind `./`, phpMyAdmin :8080, porta diretta :18080 e ingress Traefik locale (HUB/traefik-locale).
 #
-# Build immagine e avvio stack (db, migrate, web, worker se COMPOSE_PROFILES=queue, phpMyAdmin):
+# Prerequisito per `sondaggi.local` / gateway: rete Docker `rete_per_instradamento` + stack Traefik avviato.
+#
 #   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
 #
-# Solo rebuild immagine app:
-#   docker compose -f docker-compose.yml -f docker-compose.dev.yml build web
+# URL tipici: http://127.0.0.1:18080 (diretto) · http://sondaggi.local (Traefik su :80) · :8082 se usi solo il mapping storico.
+# In `.env` allinea `APP_URL` all’origine che usi (vedi `.env.example`).
 #
-# Rigenerare asset Vite sul tree montato (profilo `assets`):
-#   docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile assets run --rm assets
-#
-# Composer nel mount + volume `vendor` nominato (profilo `tools`, dopo `up` almeno una volta):
-#   docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile tools run --rm composer
-#
-# Ordine `-f`: prima `docker-compose.yml` (base), poi questo file — l’override dev (porte 18080, mount `./`, migrate)
-# si applica correttamente. Non usare questo file in produzione sulla VPS.
-# In `.env` imposta APP_URL allo stesso schema/host/porta con cui apri il sito (es. http://127.0.0.1:18080)
-# per email e URL assoluti; le foto profilo usano path `/storage/...` relativi all’origine della pagina.
-#
-# Colima (macOS/Linux, al posto di Docker Desktop): `colima start`, poi stesso `docker compose …`.
-# Il bind `./` è condiviso dalla VM se il repo è sotto la home montata (default Colima).
-# In Cursor/VS Code: Run Task → «Sondaggi: Colima + dev stack (build + mount)».
+# Altri comandi (stesso `-f docker-compose.yml -f docker-compose.dev.yml`):
+#   build web | --profile assets run --rm assets | --profile tools run --rm composer | run --rm migrate
+
+networks:
+  rete_per_instradamento:
+    external: true
+    name: rete_per_instradamento
 
 services:
-  # Stesso mount del codice di `web`: altrimenti `migrate` usa solo l’immagine e non vede le migration aggiunte in locale.
   migrate:
     volumes:
       - ./:/var/www/html
@@ -37,7 +30,6 @@ services:
     working_dir: /app
     volumes:
       - ./:/app
-      # Evita conflitti tra node_modules dell’host (es. macOS) e npm ci in Linux (ENOTEMPTY).
       - /app/node_modules
     command: sh -c "npm ci && npm run build"
 
@@ -61,6 +53,16 @@ services:
       - "18080:10000"
     volumes:
       - ./:/var/www/html
+    networks:
+      - default
+      - rete_per_instradamento
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=rete_per_instradamento
+      - traefik.http.routers.sondaggi-local-router.rule=Host(`sondaggi.local`) || Host(`sondaggi.localhost`)
+      - traefik.http.routers.sondaggi-local-router.entrypoints=web
+      - traefik.http.routers.sondaggi-local-router.service=sondaggi-local-svc
+      - traefik.http.services.sondaggi-local-svc.loadbalancer.server.port=10000
 
   worker:
     build:

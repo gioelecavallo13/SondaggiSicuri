@@ -34,7 +34,7 @@ Modifica **`.env`** almeno così (valori coerenti tra loro; puoi adattare nomi e
 
 | Variabile | Valore tipico (stack dev) |
 |-----------|---------------------------|
-| `APP_URL` | `http://127.0.0.1:18080` |
+| `APP_URL` | `http://127.0.0.1:18080` oppure `http://sondaggi.local` se usi Traefik (HUB/traefik-locale) sulla :80 |
 | `DB_CONNECTION` | `mysql` |
 | `DB_HOST` | `db` |
 | `DB_PORT` | `3306` |
@@ -71,7 +71,7 @@ Cosa succede in sintesi:
 - **MySQL** parte e il servizio **`migrate`** esegue `php artisan migrate --force`;
 - il servizio **`web`** espone l’app (nel dev override anche sulla porta host **18080**).
 
-Apri nel browser: **http://127.0.0.1:18080**
+Apri nel browser: **http://127.0.0.1:18080**, oppure tramite Traefik locale **http://sondaggi.local** (rete Docker condivisa, vedi commenti in `docker-compose.dev.yml`).
 
 - **phpMyAdmin** (solo overlay dev): **http://127.0.0.1:8080** (solo loopback, vedi `docker-compose.dev.yml`).
 

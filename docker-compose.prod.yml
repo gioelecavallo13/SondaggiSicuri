@@ -57,6 +57,8 @@ services:
   db:
     ports: !reset []
 
+  # phpMyAdmin resta definito in `docker-compose.yml` per dev/CI; in produzione non deve avviarsi.
+  # Assegnare un profilo qui lo esclude da `up` finché non si passa esplicitamente `--profile …` (non usato sulla VPS).
   phpmyadmin:
-    ports:
-      - "127.0.0.1:8084:80"
+    profiles:
+      - phpmyadmin-not-in-production

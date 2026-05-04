@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\ForceLocalProxyRootUrl;
 use App\Support\RegisterSecurityLog;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -16,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
+        $middleware->append(ForceLocalProxyRootUrl::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (Throwable $e, Request $request) {

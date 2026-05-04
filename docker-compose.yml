@@ -4,10 +4,10 @@
 # Schema DB: solo `php artisan migrate` (servizio one-shot `migrate`). La cartella
 # `docker/mysql/init` è lasciata vuota (nessun DDL duplicato rispetto alle migrations).
 #
-# Sviluppo locale (override dev dopo la base — l’ultimo file `-f` vince sui campi in conflitto):
+# Sviluppo locale (base + dev — il dev include anche rete/label Traefik locale, vedi `docker-compose.dev.yml`):
 #   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
 #
-# Produzione VPS — solo base + prod (NON usare docker-compose.dev.yml sulla VPS):
+# Produzione VPS — base + prod (NON usare `docker-compose.dev.yml` sulla VPS):
 #   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 # Le uniche modifiche “strutturali” qui sono commenti sul servizio migrate; web/worker/db restano come prima.
 #
@@ -127,7 +127,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    # Porta host solo negli overlay: `docker-compose.dev.yml` (8080), `docker-compose.prod.yml` (8084 loopback).
+    # Porta host solo in dev: `docker-compose.dev.yml` (8080). In prod (`docker-compose.prod.yml`) il servizio non viene avviato.
     environment:
       PMA_HOST: db
       PMA_PORT: 3306
